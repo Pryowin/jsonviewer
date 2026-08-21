@@ -132,14 +132,15 @@ struct ContentView: View {
     // MARK: - Tree / Editor
 
     private var treeView: some View {
-        ScrollView([.vertical, .horizontal]) {
+        ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 3) {
                 ForEach(model.rootItems) { item in
                     JSONNodeView(item: item, depth: 0)
                 }
+                Spacer(minLength: 0)
             }
             .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 0, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
