@@ -132,13 +132,16 @@ struct ContentView: View {
     // MARK: - Tree / Editor
 
     private var treeView: some View {
-        ScrollView {
-            OutlineGroup(model.rootItems, children: \.children) { item in
-                JSONRowView(item: item)
+        ScrollView([.vertical, .horizontal]) {
+            VStack(alignment: .leading, spacing: 3) {
+                ForEach(model.rootItems) { item in
+                    JSONNodeView(item: item, depth: 0)
+                }
             }
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var editorView: some View {
