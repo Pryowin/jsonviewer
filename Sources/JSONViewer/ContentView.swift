@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
-    @StateObject private var model = JSONDocumentModel()
+    @EnvironmentObject private var model: JSONDocumentModel
 
     var body: some View {
         VStack(spacing: 0) {
