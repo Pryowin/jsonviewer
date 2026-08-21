@@ -1,0 +1,15 @@
+{
+  "name": "Sample Project",
+  "version": 1.2,
+  "active": true,
+  "owner": {
+    "id": 42,
+    "email": "owner@example.com",
+    "tags": ["admin", "beta"]
+  },
+  "items": [
+    { "id": 1, "label": "First", "done": false },
+    { "id": 2, "label": "Second", "done": true }
+  ],
+  "notes": null
+}
