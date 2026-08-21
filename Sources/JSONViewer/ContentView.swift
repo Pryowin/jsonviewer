@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @EnvironmentObject private var model: JSONDocumentModel
+    @State private var showFullPath = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,26 +43,35 @@ struct ContentView: View {
             }
 
             if let url = model.fileURL {
-                Text(url.path)
+                Text(showFullPath ? url.path : url.lastPathComponent)
                     .font(.headline)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(url.path)
                     .padding(.leading, 8)
 
-                Menu {
-                    Button("Reveal in Finder") {
-                        revealInFinder(url)
-                    }
-                    Button("Open in Terminal") {
-                        openInTerminal(url)
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
+                Button(showFullPath ? "Name Only" : "Full Path") {
+                    showFullPath.toggle()
                 }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-                .help("Show this file's folder in Finder or Terminal")
+                .buttonStyle(.link)
+                .font(.caption)
+                .help(showFullPath ? "Show just the file name" : "Show the full path")
+
+                if showFullPath {
+                    Menu {
+                        Button("Reveal in Finder") {
+                            revealInFinder(url)
+                        }
+                        Button("Open in Terminal") {
+                            openInTerminal(url)
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .menuStyle(.borderlessButton)
+                    .fixedSize()
+                    .help("Show this file's folder in Finder or Terminal")
+                }
             }
 
             Spacer()
