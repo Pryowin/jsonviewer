@@ -21,7 +21,7 @@ struct JSONViewerApp: App {
                 Button("About JSON Viewer") {
                     NSApplication.shared.orderFrontStandardAboutPanel(
                         options: [
-                            .applicationVersion: "V1.1.0",
+                            .applicationVersion: "V1.2.0",
                             .version: ""
                         ]
                     )

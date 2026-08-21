@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import UniformTypeIdentifiers
 
 struct ContentView: View {
@@ -41,11 +42,26 @@ struct ContentView: View {
             }
 
             if let url = model.fileURL {
-                Text(url.lastPathComponent)
+                Text(url.path)
                     .font(.headline)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                    .help(url.path)
                     .padding(.leading, 8)
+
+                Menu {
+                    Button("Reveal in Finder") {
+                        revealInFinder(url)
+                    }
+                    Button("Open in Terminal") {
+                        openInTerminal(url)
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .help("Show this file's folder in Finder or Terminal")
             }
 
             Spacer()
@@ -168,6 +184,16 @@ struct ContentView: View {
         if panel.runModal() == .OK, let url = panel.url {
             model.load(url: url)
         }
+    }
+
+    private func revealInFinder(_ url: URL) {
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
+    private func openInTerminal(_ url: URL) {
+        let folder = url.deletingLastPathComponent()
+        guard let terminalURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal") else { return }
+        NSWorkspace.shared.open([folder], withApplicationAt: terminalURL, configuration: NSWorkspace.OpenConfiguration())
     }
 
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
