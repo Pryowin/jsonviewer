@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 @main
 struct JSONViewerApp: App {
@@ -9,6 +10,16 @@ struct JSONViewerApp: App {
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(replacing: .appInfo) {
+                Button("About JSON Viewer") {
+                    NSApplication.shared.orderFrontStandardAboutPanel(
+                        options: [
+                            .applicationVersion: "V1.0.0",
+                            .version: ""
+                        ]
+                    )
+                }
+            }
         }
     }
 }
