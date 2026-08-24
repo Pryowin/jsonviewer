@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @EnvironmentObject private var model: MarkdownDocumentModel
     @State private var showFullPath = true
+    @State private var isPreviewingEdit = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -17,7 +18,11 @@ struct ContentView: View {
             } else if model.fileURL == nil {
                 emptyState
             } else if model.isEditing {
-                editorView
+                if isPreviewingEdit {
+                    MarkdownDocumentView(text: model.editableText)
+                } else {
+                    editorView
+                }
             } else {
                 MarkdownDocumentView(text: model.renderedText)
             }
@@ -74,16 +79,27 @@ struct ContentView: View {
 
             if model.fileURL != nil {
                 if model.isEditing {
+                    Picker("", selection: $isPreviewingEdit) {
+                        Text("Edit").tag(false)
+                        Text("Preview").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 160)
+                    .padding(.trailing, 8)
+
                     Button("Cancel") {
                         model.cancelEditing()
+                        isPreviewingEdit = false
                     }
                     Button("Save") {
                         model.save()
+                        isPreviewingEdit = false
                     }
                     .keyboardShortcut("s", modifiers: .command)
                 } else {
                     Button {
                         model.beginEditing()
+                        isPreviewingEdit = false
                     } label: {
                         Label("Edit", systemImage: "pencil")
                     }
