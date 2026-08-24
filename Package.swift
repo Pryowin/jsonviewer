@@ -10,6 +10,10 @@ let package = Package(
         .executableTarget(
             name: "JSONViewer",
             path: "Sources/JSONViewer"
+        ),
+        .executableTarget(
+            name: "MarkdownViewer",
+            path: "Sources/MarkdownViewer"
         )
     ]
 )

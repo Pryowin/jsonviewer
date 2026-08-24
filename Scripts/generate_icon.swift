@@ -1,7 +1,8 @@
 #!/usr/bin/env swift
-// Generates the full macOS iconset (all required pixel sizes) for the app:
-// a document page with a folded corner, "{ }" braces for JSON, and a
-// magnifying glass to signal "viewer".
+// Generates the full macOS iconset (all required pixel sizes) for an app:
+// a document page with a folded corner, a centered glyph, and a magnifying
+// glass to signal "viewer". Usage:
+//   swift generate_icon.swift <outputDir> [glyph] [bgTopHex] [bgBottomHex] [glyphHex]
 import AppKit
 
 let sizes: [(name: String, pixels: Int)] = [
@@ -17,7 +18,35 @@ let sizes: [(name: String, pixels: Int)] = [
     ("icon_512x512@2x", 1024),
 ]
 
-let outputDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "AppIcon.iconset"
+let args = CommandLine.arguments
+let outputDir = args.count > 1 ? args[1] : "AppIcon.iconset"
+let glyphText = args.count > 2 ? args[2] : "{ }"
+let bgTopHex = args.count > 3 ? args[3] : "5C9EFF"
+let bgBottomHex = args.count > 4 ? args[4] : "243D9E"
+let glyphHex = args.count > 5 ? args[5] : "6B339E"
+
+func cgColor(hex: String, alpha: CGFloat = 1.0) -> CGColor {
+    var s = hex
+    if s.hasPrefix("#") { s.removeFirst() }
+    var value: UInt64 = 0
+    Scanner(string: s).scanHexInt64(&value)
+    let r = CGFloat((value & 0xFF0000) >> 16) / 255.0
+    let g = CGFloat((value & 0x00FF00) >> 8) / 255.0
+    let b = CGFloat(value & 0x0000FF) / 255.0
+    return CGColor(red: r, green: g, blue: b, alpha: alpha)
+}
+
+func nsColor(hex: String, alpha: CGFloat = 1.0) -> NSColor {
+    var s = hex
+    if s.hasPrefix("#") { s.removeFirst() }
+    var value: UInt64 = 0
+    Scanner(string: s).scanHexInt64(&value)
+    let r = CGFloat((value & 0xFF0000) >> 16) / 255.0
+    let g = CGFloat((value & 0x00FF00) >> 8) / 255.0
+    let b = CGFloat(value & 0x0000FF) / 255.0
+    return NSColor(calibratedRed: r, green: g, blue: b, alpha: alpha)
+}
+
 let fm = FileManager.default
 try? fm.removeItem(atPath: outputDir)
 try! fm.createDirectory(atPath: outputDir, withIntermediateDirectories: true)
@@ -47,8 +76,8 @@ func drawIcon(canvas s: CGFloat) {
     ctx.addPath(bgPath)
     ctx.clip()
     let bgColors = [
-        CGColor(red: 0.36, green: 0.62, blue: 1.00, alpha: 1.0),
-        CGColor(red: 0.14, green: 0.24, blue: 0.62, alpha: 1.0),
+        cgColor(hex: bgTopHex),
+        cgColor(hex: bgBottomHex),
     ] as CFArray
     let bgGradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: bgColors, locations: [0, 1])!
     ctx.drawLinearGradient(bgGradient, start: CGPoint(x: 0, y: s), end: CGPoint(x: 0, y: 0), options: [])
@@ -81,17 +110,18 @@ func drawIcon(canvas s: CGFloat) {
     ctx.addPath(ear)
     ctx.fillPath()
 
-    // "{ }" braces centered in the page, in the app's key-color purple.
-    let braceFont = NSFont.systemFont(ofSize: s * 0.34, weight: .bold)
-    let braceColor = NSColor(calibratedRed: 0.42, green: 0.20, blue: 0.62, alpha: 1.0)
-    let braceAttrs: [NSAttributedString.Key: Any] = [.font: braceFont, .foregroundColor: braceColor]
-    let braceString = "{ }" as NSString
-    let braceSize = braceString.size(withAttributes: braceAttrs)
-    let braceOrigin = CGPoint(
-        x: pageX + (pageWidth - braceSize.width) / 2,
-        y: pageY + pageHeight * 0.56 - braceSize.height / 2
+    // Glyph centered in the page, in the app's accent color.
+    let glyphIsWide = glyphText.count > 3
+    let glyphFont = NSFont.systemFont(ofSize: s * (glyphIsWide ? 0.19 : 0.34), weight: .bold)
+    let glyphColor = nsColor(hex: glyphHex)
+    let glyphAttrs: [NSAttributedString.Key: Any] = [.font: glyphFont, .foregroundColor: glyphColor]
+    let glyphString = glyphText as NSString
+    let glyphSize = glyphString.size(withAttributes: glyphAttrs)
+    let glyphOrigin = CGPoint(
+        x: pageX + (pageWidth - glyphSize.width) / 2,
+        y: pageY + pageHeight * 0.56 - glyphSize.height / 2
     )
-    braceString.draw(at: braceOrigin, withAttributes: braceAttrs)
+    glyphString.draw(at: glyphOrigin, withAttributes: glyphAttrs)
 
     // Magnifying glass overlapping the bottom-right of the page.
     let lensCenter = CGPoint(x: s * 0.665, y: s * 0.255)
